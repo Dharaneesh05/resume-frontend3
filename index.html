@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>home</title>
-<!--     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -91,12 +90,12 @@
     <div class="sidebar">
         <h2>AI POWERED RESUME ANALYZER & BUILDER</h2>
         <nav>
-            <a href="/" class="active">HOME</a>
-            <a href="analyzer">RESUME ANALYZER</a>
-            <a href="builder">RESUME BUILDER</a>
-            <a href="dashboard">DASHBOARD</a>
-            <a href="job_search">JOB SEARCH</a>
-            <a href="feedback">FEEDBACK</a>
+            <a href="index.html" class="active">HOME</a>
+            <a href="analyzer.html">RESUME ANALYZER</a>
+            <a href="builder.html">RESUME BUILDER</a>
+            <a href="dashboard.html">DASHBOARD</a>
+            <a href="job_search.html">JOB SEARCH</a>
+            <a href="feedback.html">FEEDBACK</a>
         </nav>
     </div>
 
@@ -124,12 +123,12 @@
             </div>
         </div>
         <div class="cta-section">
-            <a href="/analyzer" class="cta-button">Get ATS score of your resume<i class="fas fa-arrow-right"></i></a>
+            <a href="analyzer.html" class="cta-button">Get ATS score of your resume <i class="fas fa-arrow-right"></i></a>
         </div>
     </div>
 
-     <!-- Chatbot Modal -->
-     <div class="chatbot-modal" id="chatbotModal">
+    <!-- Chatbot Modal -->
+    <div class="chatbot-modal" id="chatbotModal">
         <div class="chatbot-header">
             Resume Bot
             <span onclick="toggleChatbot()" style="cursor:pointer;">×</span>
@@ -148,69 +147,62 @@
     <script>
         // Chatbot Functions
         function toggleChatbot() {
-        const bot = document.getElementById('chatbotModal');
-        bot.style.display = bot.style.display === 'flex' ? 'none' : 'flex';
-    }
+            const bot = document.getElementById('chatbotModal');
+            bot.style.display = bot.style.display === 'flex' ? 'none' : 'flex';
+        }
 
-    async function sendMessage() {
-    const input = document.getElementById("chatInput");
-    const message = input.value.trim();
-    const chatBody = document.getElementById("chatbotBody");
+        async function sendMessage() {
+            const input = document.getElementById("chatInput");
+            const message = input.value.trim();
+            const chatBody = document.getElementById("chatbotBody");
 
-    if (message) {
-        const userMessage = document.createElement("p");
-        userMessage.style.color = "#4CAF50";
-        userMessage.textContent = "You: "+ message;
-        chatBody.appendChild(userMessage);
-        input.value = "";
+            if (message) {
+                const userMessage = document.createElement("p");
+                userMessage.style.color = "#4CAF50";
+                userMessage.textContent = "You: " + message;
+                chatBody.appendChild(userMessage);
+                input.value = "";
 
-
-        const typingMessage = document.createElement("p");
+                const typingMessage = document.createElement("p");
                 typingMessage.textContent = "Bot: Typing...";
                 chatBody.appendChild(typingMessage);
                 chatBody.scrollTop = chatBody.scrollHeight;
 
+                try {
+                    const response = await fetch('http://localhost:11434/api/generate', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            model: 'llama3',
+                            prompt: message,
+                            stream: false
+                        })
+                    });
 
-        // Fetch response from local Ollama server
-        try {
-            const response = await fetch('http://localhost:11434/api/generate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: 'llama3',
-                    prompt: message,
-                    stream: false
-                })
-            });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
+                    const data = await response.json();
+                    chatBody.removeChild(typingMessage);
+                    const botReply = document.createElement("p");
+                    botReply.textContent = "Bot: " + data.response;
+                    chatBody.appendChild(botReply);
+                } catch (error) {
+                    console.error('Ollama API error:', error);
+                    chatBody.removeChild(typingMessage);
+                    const botReply = document.createElement("p");
+                    botReply.textContent = "Bot: Sorry, I couldn't connect to the AI server.";
+                    chatBody.appendChild(botReply);
+                }
 
-            if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-            const data = await response.json();
-            chatBody.removeChild(typingMessage);
-            const botReply = document.createElement("p");
-            botReply.textContent = "Bot: " + data.response;
-            chatBody.appendChild(botReply);
-        } catch (error) {
-            console.error('Ollama API error:', error); // Added for debugging
-            chatBody.removeChild(typingMessage);
-            const botReply = document.createElement("p");
-            botReply.textContent = "Bot: Sorry, I couldn't connect to the AI server.";
-            chatBody.appendChild(botReply);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
         }
 
-        chatBody.scrollTop = chatBody.scrollHeight;
-    }
-}
-
-        // Load data on page load
-        window.onload = fetchFeedbackData;
-        // Initialize with first tab active
-        openTab('trending');
+        window.onload = () => {
+            // Add your on-load logic here if needed
+        };
     </script>
 
     <script src="main.js"></script>
