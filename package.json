@@ -1,0 +1,24 @@
+{
+  "name": "resumeanalyzerbuilder",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start":"node main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hunterdii/Smart-AI-Resume-Analyzer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Hunterdii/Smart-AI-Resume-Analyzer/issues"
+  },
+  "homepage": "https://github.com/Hunterdii/Smart-AI-Resume-Analyzer#readme",
+  "description": "",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
