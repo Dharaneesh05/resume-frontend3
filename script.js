@@ -1,3 +1,6 @@
+// ✅ Set this to your deployed backend URL
+const BACKEND_BASE_URL = 'https://your-backend-url.onrender.com';
+
 document.getElementById('buildResume').addEventListener('click', async function() {
     // Get input values
     const name = document.getElementById('name').value;
