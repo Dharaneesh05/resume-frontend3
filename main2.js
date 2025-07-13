@@ -1,4 +1,5 @@
-const BACKEND_BASE_URL = 'https://your-flask-backend.onrender.com';
+const BACKEND_BASE_URL = 'https://resume-backend-1-3ypj.onrender.com';
+
 
 function login() {
     const email = document.getElementById('admin_email').value;
