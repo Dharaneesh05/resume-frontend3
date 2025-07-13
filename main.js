@@ -1,3 +1,5 @@
+const BACKEND_BASE_URL = 'https://your-flask-backend.onrender.com';
+
 function login() {
     const email = document.getElementById('admin_email').value;
     const password = document.getElementById('admin_password').value;
