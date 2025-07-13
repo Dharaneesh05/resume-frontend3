@@ -15,7 +15,9 @@ document.getElementById('buildResume').addEventListener('click', async function(
 
     try {
         // Make API call to generate resume
-        const response = await fetch('http://127.0.0.1:5000/generate_resume', {
+        // const response = await fetch('http://127.0.0.1:5000/generate_resume', {
+        const response = await fetch(`${BACKEND_BASE_URL}/generate_resume`, {
+
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
