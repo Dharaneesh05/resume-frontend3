@@ -225,7 +225,9 @@
     <script>
         // Update roles when category changes
         document.getElementById('category').addEventListener('change', function() {
-            fetch('/get_roles?category=' + encodeURIComponent(this.value))
+            // fetch('/get_roles?category=' + encodeURIComponent(this.value))
+            fetch(`${BACKEND_BASE_URL}/get_roles?category=${encodeURIComponent(this.value)}`)
+
                 .then(response => response.json())
                 .then(data => {
                     const roleSelect = document.getElementById('role');
@@ -249,7 +251,9 @@
         });
 
         function updateRoleInfo(category, role) {
-            fetch(`/get_role_info?category=${encodeURIComponent(category)}&role=${encodeURIComponent(role)}`)
+            // fetch(`/get_role_info?category=${encodeURIComponent(category)}&role=${encodeURIComponent(role)}`)
+            fetch(`${BACKEND_BASE_URL}/get_role_info?category=${encodeURIComponent(category)}&role=${encodeURIComponent(role)}`)
+
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('role-info').innerHTML = `
@@ -284,10 +288,15 @@
             submitButton.disabled = true;
             loadingSpinner.style.display = 'block';
 
-            fetch('/analyzer', {
-                method: 'POST',
-                body: formData
-            })
+            // fetch('/analyzer', {
+            //     method: 'POST',
+            //     body: formData
+            // })
+            fetch(`${BACKEND_BASE_URL}/analyzer`, {
+    method: 'POST',
+    body: formData
+})
+
             .then(response => response.json())
             .then(data => {
                 submitButton.disabled = false;
