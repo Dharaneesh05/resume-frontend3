@@ -222,7 +222,11 @@
 
     <div class="chatbot-toggle" onclick="toggleChatbot()">Chat</div>
     <script src="main.js"></script>
+<!--     const BACKEND_BASE_URL = 'https://resume-backend-1-3ypj.onrender.com'; -->
+
     <script>
+        const BACKEND_BASE_URL = 'https://resume-backend-1-3ypj.onrender.com';
+
         // Update roles when category changes
         document.getElementById('category').addEventListener('change', function() {
             // fetch('/get_roles?category=' + encodeURIComponent(this.value))
