@@ -1,8 +1,7 @@
-const BACKEND_BASE_URL = 'https://resume-backend-1-3ypj.onrender.com';
-
+// Use global BACKEND_BASE_URL from main.js
+const BACKEND_BASE_URL = window.BACKEND_BASE_URL;
 
 document.getElementById('buildResume').addEventListener('click', async function() {
-    // Get input values
     const name = document.getElementById('name').value;
     const email = document.getElementById('email').value;
     const phone = document.getElementById('phone').value;
@@ -10,14 +9,10 @@ document.getElementById('buildResume').addEventListener('click', async function(
     const experience = document.getElementById('experience').value;
     const skills = document.getElementById('skills').value;
 
-    // Prepare data for API
     const resumeData = { name, email, phone, education, experience, skills };
 
     try {
-        // Make API call to generate resume
-        // const response = await fetch('http://127.0.0.1:5000/generate_resume', {
         const response = await fetch(`${BACKEND_BASE_URL}/generate_resume`, {
-
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -25,15 +20,12 @@ document.getElementById('buildResume').addEventListener('click', async function(
             body: JSON.stringify(resumeData),
         });
 
-        // Check if response is OK
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        // Parse JSON response
         const result = await response.json();
 
-        // Display resume (assuming the API returns the formatted resume)
         document.getElementById('outputName').textContent = result.name || name;
         document.getElementById('outputEmail').textContent = result.email || email;
         document.getElementById('outputPhone').textContent = result.phone || phone;
@@ -42,7 +34,6 @@ document.getElementById('buildResume').addEventListener('click', async function(
         document.getElementById('outputSkills').textContent = result.skills || skills;
         document.getElementById('resumeOutput').classList.remove('hidden');
 
-        // Analyze resume (client-side for now)
         let completenessIssues = [];
         if (!name) completenessIssues.push('Name is missing.');
         if (!email) completenessIssues.push('Email is missing.');
