@@ -1,10 +1,10 @@
-const BACKEND_BASE_URL = 'https://resume-backend-1-3ypj.onrender.com';
-
+// Use global BACKEND_BASE_URL from main.js
+const BACKEND_BASE_URL = window.BACKEND_BASE_URL;
 
 function login() {
     const email = document.getElementById('admin_email').value;
     const password = document.getElementById('admin_password').value;
-    fetch('/login', {
+    fetch(`${BACKEND_BASE_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
@@ -20,7 +20,7 @@ function login() {
 }
 
 function logout() {
-    fetch('/logout', {
+    fetch(`${BACKEND_BASE_URL}/logout`, {
         method: 'POST'
     })
     .then(response => response.json())
@@ -33,7 +33,7 @@ function logout() {
 
 function selectResume(resumeId) {
     if (resumeId) {
-        fetch(`/select_resume/${resumeId}`)
+        fetch(`${BACKEND_BASE_URL}/select_resume/${resumeId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
