@@ -219,11 +219,12 @@
     <div class="chatbot-toggle" onclick="toggleChatbot()">Chat</div>
     <script src="main.js"></script>
     <script>
-        const BACKEND_BASE_URL = 'https://resume-backend-1-3ypj.onrender.com';
+        // Declare BACKEND_BASE_URL here to avoid conflicts with main.js
+        window.BACKEND_BASE_URL = 'https://resume-backend-1-3ypj.onrender.com';
 
         // Update roles when category changes
         document.getElementById('category').addEventListener('change', function() {
-            fetch(`${BACKEND_BASE_URL}/get_roles?category=${encodeURIComponent(this.value)}`)
+            fetch(`${window.BACKEND_BASE_URL}/get_roles?category=${encodeURIComponent(this.value)}`)
                 .then(response => response.json())
                 .then(data => {
                     const roleSelect = document.getElementById('role');
@@ -247,7 +248,7 @@
         });
 
         function updateRoleInfo(category, role) {
-            fetch(`${BACKEND_BASE_URL}/get_role_info?category=${encodeURIComponent(category)}&role=${encodeURIComponent(role)}`)
+            fetch(`${window.BACKEND_BASE_URL}/get_role_info?category=${encodeURIComponent(category)}&role=${encodeURIComponent(role)}`)
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('role-info').innerHTML = `
@@ -282,7 +283,7 @@
             submitButton.disabled = true;
             loadingSpinner.style.display = 'block';
 
-            fetch(`${BACKEND_BASE_URL}/analyzer`, {
+            fetch(`${window.BACKEND_BASE_URL}/analyzer`, {
                 method: 'POST',
                 body: formData
             })
@@ -290,12 +291,14 @@
             .then(data => {
                 submitButton.disabled = false;
                 loadingSpinner.style.display = 'none';
+                console.log('Analyzer Response:', data); // Debug response
                 if (data.status === 'success') {
                     const analysis = data.analysis;
                     analysisResults.style.display = 'block';
 
                     // Update ATS score with progress bar
                     const atsScore = analysis.ats_score || 0;
+                    console.log('ATS Score:', atsScore); // Debug ATS score
                     const atsProgress = document.getElementById('ats-score-progress');
                     const atsText = document.getElementById('ats-score-text');
                     atsText.textContent = `${atsScore}%`;
@@ -338,7 +341,7 @@
         function login() {
             const email = document.getElementById('admin_email').value;
             const password = document.getElementById('admin_password').value;
-            fetch(`${BACKEND_BASE_URL}/login`, {
+            fetch(`${window.BACKEND_BASE_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
@@ -354,7 +357,7 @@
         }
 
         function logout() {
-            fetch(`${BACKEND_BASE_URL}/logout`, { method: 'POST' })
+            fetch(`${window.BACKEND_BASE_URL}/logout`, { method: 'POST' })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
@@ -387,7 +390,7 @@
                 chatBody.scrollTop = chatBody.scrollHeight;
 
                 try {
-                    const response = await fetch(`${BACKEND_BASE_URL}/chat`, {
+                    const response = await fetch(`${window.BACKEND_BASE_URL}/chat`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
