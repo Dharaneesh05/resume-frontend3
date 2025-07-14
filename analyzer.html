@@ -282,10 +282,12 @@
     submitButton.disabled = true;
     loadingSpinner.style.display = 'block';
 
-    // Log FormData contents for debugging
-    for (let pair of formData.entries()) {
-        console.log('FormData:', pair[0], pair[1]);
+    // Log FormData contents
+    const formDataObj = {};
+    for (let [key, value] of formData.entries()) {
+        formDataObj[key] = value;
     }
+    console.log('Submitting FormData:', formDataObj);
 
     fetch(`${BACKEND_BASE_URL}/analyzer`, {
         method: 'POST',
@@ -293,7 +295,9 @@
     })
     .then(response => {
         if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+            return response.json().then(errorData => {
+                throw new Error(`HTTP ${response.status}: ${errorData.message || 'Unknown error'}`);
+            });
         }
         return response.json();
     })
@@ -336,7 +340,7 @@
     .catch(error => {
         submitButton.disabled = false;
         loadingSpinner.style.display = 'none';
-        console.error('Fetch Error:', error);
+        console.error('Fetch Error:', error.message);
         showError('Error: ' + error.message);
     });
 });
