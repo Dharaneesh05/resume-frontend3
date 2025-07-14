@@ -112,26 +112,26 @@
             <div class="form-section">
                 <h2 class="form-section-title">Template Selection</h2>
                 <select name="template">
-                    <option value="Modern" {% if form_data.template | default('Modern') == 'Modern' %}selected{% endif %}>Modern</option>
-                    <option value="Professional" {% if form_data.template | default('') == 'Professional' %}selected{% endif %}>Professional</option>
-                    <option value="Minimal" {% if form_data.template | default('') == 'Minimal' %}selected{% endif %}>Minimal</option>
-                    <option value="Creative" {% if form_data.template | default('') == 'Creative' %}selected{% endif %}>Creative</option>
+                    <option value="Modern">Modern</option>
+                    <option value="Professional">Professional</option>
+                    <option value="Minimal">Minimal</option>
+                    <option value="Creative">Creative</option>
                 </select>
             </div>
             <div class="form-section">
                 <h2 class="form-section-title">Personal Information</h2>
                 <div class="form-grid">
-                    <input type="text" name="personal_info[full_name]" placeholder="Full Name" value="{{ (form_data.personal_info | default({})).full_name | default('') }}">
-                    <input type="email" name="personal_info[email]" placeholder="Email" value="{{ (form_data.personal_info | default({})).email | default('') }}">
-                    <input type="text" name="personal_info[phone]" placeholder="Phone" value="{{ (form_data.personal_info | default({})).phone | default('') }}">
-                    <input type="text" name="personal_info[location]" placeholder="Location" value="{{ (form_data.personal_info | default({})).location | default('') }}">
-                    <input type="text" name="personal_info[linkedin]" placeholder="LinkedIn URL" value="{{ (form_data.personal_info | default({})).linkedin | default('') }}">
-                    <input type="text" name="personal_info[portfolio]" placeholder="Portfolio Website" value="{{ (form_data.personal_info | default({})).portfolio | default('') }}">
+                    <input type="text" name="personal_info[full_name]" placeholder="Full Name" value="">
+                    <input type="email" name="personal_info[email]" placeholder="Email" value="">
+                    <input type="text" name="personal_info[phone]" placeholder="Phone" value="">
+                    <input type="text" name="personal_info[location]" placeholder="Location" value="">
+                    <input type="text" name="personal_info[linkedin]" placeholder="LinkedIn URL" value="">
+                    <input type="text" name="personal_info[portfolio]" placeholder="Portfolio Website" value="">
                 </div>
             </div>
             <div class="form-section">
                 <h2 class="form-section-title">Professional Summary</h2>
-                <textarea name="summary" placeholder="Write a brief summary">{{ form_data.summary | default('') }}</textarea>
+                <textarea name="summary" placeholder="Write a brief summary"></textarea>
             </div>
             <div class="form-section" id="experiences">
                 <h2 class="form-section-title">Work Experience</h2>
@@ -148,10 +148,10 @@
             <div class="form-section">
                 <h2 class="form-section-title">Skills</h2>
                 <div class="form-grid">
-                    <textarea name="skills_categories[technical]" placeholder="Technical Skills (one per line)">{{ '\n'.join((form_data.skills_categories | default({})).technical | default([])) }}</textarea>
-                    <textarea name="skills_categories[soft]" placeholder="Soft Skills (one per line)">{{ '\n'.join((form_data.skills_categories | default({})).soft | default([])) }}</textarea>
-                    <textarea name="skills_categories[languages]" placeholder="Languages (one per line)">{{ '\n'.join((form_data.skills_categories | default({})).languages | default([])) }}</textarea>
-                    <textarea name="skills_categories[tools]" placeholder="Tools & Technologies (one per line)">{{ '\n'.join((form_data.skills_categories | default({})).tools | default([])) }}</textarea>
+                    <textarea name="skills_categories[technical]" placeholder="Technical Skills (one per line)"></textarea>
+                    <textarea name="skills_categories[soft]" placeholder="Soft Skills (one per line)"></textarea>
+                    <textarea name="skills_categories[languages]" placeholder="Languages (one per line)"></textarea>
+                    <textarea name="skills_categories[tools]" placeholder="Tools & Technologies (one per line)"></textarea>
                 </div>
             </div>
             <button type="submit" class="action-button">Generate Resume</button>
@@ -172,7 +172,6 @@
             <button onclick="sendMessage()">Send</button>
         </div>
     </div>
-
     <div class="chatbot-toggle" onclick="toggleChatbot()">Chat</div>
     <script src="main.js"></script>
     <script>
@@ -272,7 +271,7 @@
 
             formData.append('form_data', JSON.stringify(data));
             document.getElementById('error-message').style.display = 'none';
-            fetch('/builder', {
+            fetch(`${window.BACKEND_BASE_URL}/builder`, {
                 method: 'POST',
                 body: formData
             })
@@ -294,71 +293,68 @@
                 showError('Error generating resume: ' + error.message);
             });
         });
-         // Chatbot Functions
+
+        // Chatbot Functions
         function toggleChatbot() {
-        const bot = document.getElementById('chatbotModal');
-        bot.style.display = bot.style.display === 'flex' ? 'none' : 'flex';
-    }
+            const bot = document.getElementById('chatbotModal');
+            bot.style.display = bot.style.display === 'flex' ? 'none' : 'flex';
+        }
 
-    async function sendMessage() {
-    const input = document.getElementById("chatInput");
-    const message = input.value.trim();
-    const chatBody = document.getElementById("chatbotBody");
+        async function sendMessage() {
+            const input = document.getElementById("chatInput");
+            const message = input.value.trim();
+            const chatBody = document.getElementById("chatbotBody");
 
-    if (message) {
-        const userMessage = document.createElement("p");
-        userMessage.style.color = "#4CAF50";
-        userMessage.textContent = "You: "+ message;
-        chatBody.appendChild(userMessage);
-        input.value = "";
+            if (message) {
+                const userMessage = document.createElement("p");
+                userMessage.style.color = "#4CAF50";
+                userMessage.textContent = "You: " + message;
+                chatBody.appendChild(userMessage);
+                input.value = "";
 
-
-        const typingMessage = document.createElement("p");
+                const typingMessage = document.createElement("p");
                 typingMessage.textContent = "Bot: Typing...";
                 chatBody.appendChild(typingMessage);
                 chatBody.scrollTop = chatBody.scrollHeight;
 
+                try {
+                    const response = await fetch(`${window.BACKEND_BASE_URL}/chat`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            model: 'llama3',
+                            prompt: message,
+                            stream: false
+                        })
+                    });
 
-        // Fetch response from local Ollama server
-        try {
-            const response = await fetch('http://localhost:11434/api/generate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: 'llama3',
-                    prompt: message,
-                    stream: false
-                })
-            });
-
-
-            if (!response.ok) {
+                    if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
 
-            const data = await response.json();
-            chatBody.removeChild(typingMessage);
-            const botReply = document.createElement("p");
-            botReply.textContent = "Bot: " + data.response;
-            chatBody.appendChild(botReply);
-        } catch (error) {
-            console.error('Ollama API error:', error); // Added for debugging
-            chatBody.removeChild(typingMessage);
-            const botReply = document.createElement("p");
-            botReply.textContent = "Bot: Sorry, I couldn't connect to the AI server.";
-            chatBody.appendChild(botReply);
+                    const data = await response.json();
+                    chatBody.removeChild(typingMessage);
+                    const botReply = document.createElement("p");
+                    botReply.textContent = "Bot: " + data.response;
+                    chatBody.appendChild(botReply);
+                } catch (error) {
+                    console.error('Chat API error:', error);
+                    chatBody.removeChild(typingMessage);
+                    const botReply = document.createElement("p");
+                    botReply.textContent = "Bot: Sorry, I couldn't connect to the AI server.";
+                    chatBody.appendChild(botReply);
+                }
+
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
         }
 
-        chatBody.scrollTop = chatBody.scrollHeight;
-    }
-}
-
-        // Load data on page load
-        window.onload = fetchFeedbackData;
-        // Initialize with first tab active
-        openTab('trending');
+        // Load data on page load (commented out as functions are undefined)
+        // window.onload = fetchFeedbackData;
+        // Initialize with first tab active (commented out as function is undefined)
+        // openTab('trending');
     </script>
 </body>
 </html>
