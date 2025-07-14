@@ -56,19 +56,19 @@
     <div class="metrics">
         <div class="metric-box">
             <h2>Total Resumes</h2>
-            <p>{{ total_resumes | default(0) }}</p>
+            <p>0</p>
         </div>
         <div class="metric-box">
             <h2>Avg ATS Score</h2>
-            <p>{{ avg_ats_score | default(0) }}%</p>
+            <p>0%</p>
         </div>
         <div class="metric-box">
             <h2>High Performing</h2>
-            <p>{{ high_performing | default(0) }}</p>
+            <p>0</p>
         </div>
         <div class="metric-box">
             <h2>Success Rate</h2>
-            <p>{{ success_rate | default(0) }}%</p>
+            <p>0%</p>
         </div>
     </div>
 
@@ -82,13 +82,7 @@
     <div class="section">
         <h2>Skill Distribution (Top 5)</h2>
         <ul>
-            {% if skill_distribution %}
-                {% for skill, count in skill_distribution.items() %}
-                    <li>{{ skill }}: {{ count }}</li>
-                {% endfor %}
-            {% else %}
-                <li>No skills data available</li>
-            {% endif %}
+            <li>No skills data available</li>
         </ul>
     </div>
 
@@ -96,13 +90,7 @@
     <div class="section">
         <h2>Weekly Submission Pattern (Last 4 Weeks)</h2>
         <ul>
-            {% if weekly_submissions %}
-                {% for week, count in weekly_submissions.items() %}
-                    <li>{{ week }}: {{ count }}</li>
-                {% endfor %}
-            {% else %}
-                <li>No weekly data available</li>
-            {% endif %}
+            <li>No weekly data available</li>
         </ul>
     </div>
 
@@ -110,13 +98,7 @@
     <div class="section">
         <h2>Resumes by Job Category</h2>
         <ul>
-            {% if resumes_by_category %}
-                {% for category, count in resumes_by_category.items() %}
-                    <li>{{ category }}: {{ count }}</li>
-                {% endfor %}
-            {% else %}
-                <li>No category data available</li>
-            {% endif %}
+            <li>No category data available</li>
         </ul>
     </div>
 
@@ -134,19 +116,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% if recent_resumes %}
-                    {% for resume in recent_resumes %}
-                        <tr>
-                            <td>{{ resume.filename }}</td>
-                            <td>{{ resume.upload_date }}</td>
-                            <td>{{ resume.job_category }}</td>
-                            <td>{{ resume.job_role }}</td>
-                            <td>{{ resume.ats_score }}%</td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr><td colspan="5">No recent resumes available</td></tr>
-                {% endif %}
+                <tr><td colspan="5">No recent resumes available</td></tr>
             </tbody>
         </table>
     </div>
@@ -161,7 +131,7 @@
                 labels: ['0-20%', '20-40%', '40-60%', '60-80%', '80-100%'],
                 datasets: [{
                     label: 'Number of Resumes',
-                    data: {{ ats_score_distribution | tojson | default('[0, 0, 0, 0, 0]' | tojson) }},
+                    data: [0, 0, 0, 0, 0],
                     backgroundColor: '#4CAF50',
                     borderColor: '#66BB6A',
                     borderWidth: 1
