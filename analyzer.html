@@ -139,14 +139,12 @@
         <h2>AI POWERED RESUME ANALYZER & BUILDER</h2>
         <nav>
             <a href="index.html">HOME</a>
-            <a href="analyzer.html"  class="active">RESUME ANALYZER</a>
+            <a href="analyzer.html" class="active">RESUME ANALYZER</a>
             <a href="builder.html">RESUME BUILDER</a>
             <a href="dashboard.html">DASHBOARD</a>
             <a href="job_search.html">JOB SEARCH</a>
             <a href="feedback.html">FEEDBACK</a>
         </nav>
-       
-
     </div>
     <div class="main-content">
         <div class="main-header">
@@ -157,15 +155,14 @@
             <div class="form-section">
                 <h2 class="form-section-title">Job Role Selection</h2>
                 <select id="category" name="category">
-                    {% for category in job_roles.keys() %}
-                        <option value="{{ category }}">{{ category }}</option>
-                    {% endfor %}
+                    <option value="Frontend">Frontend</option>
+                    <option value="Backend">Backend</option>
+                    <option value="Full Stack">Full Stack</option>
                 </select>
                 <select id="role" name="role">
-                    {% set first_category = job_roles.keys() | first %}
-                    {% for role in job_roles[first_category].keys() %}
-                        <option value="{{ role }}">{{ role }}</option>
-                    {% endfor %}
+                    <option value="Frontend Developer">Frontend Developer</option>
+                    <option value="Backend Developer">Backend Developer</option>
+                    <option value="Full Stack Developer">Full Stack Developer</option>
                 </select>
                 <div id="role-info"></div>
             </div>
@@ -219,19 +216,14 @@
             <button onclick="sendMessage()">Send</button>
         </div>
     </div>
-
     <div class="chatbot-toggle" onclick="toggleChatbot()">Chat</div>
     <script src="main.js"></script>
-<!--     const BACKEND_BASE_URL = 'https://resume-backend-1-3ypj.onrender.com'; -->
-
     <script>
         const BACKEND_BASE_URL = 'https://resume-backend-1-3ypj.onrender.com';
 
         // Update roles when category changes
         document.getElementById('category').addEventListener('change', function() {
-            // fetch('/get_roles?category=' + encodeURIComponent(this.value))
             fetch(`${BACKEND_BASE_URL}/get_roles?category=${encodeURIComponent(this.value)}`)
-
                 .then(response => response.json())
                 .then(data => {
                     const roleSelect = document.getElementById('role');
@@ -255,9 +247,7 @@
         });
 
         function updateRoleInfo(category, role) {
-            // fetch(`/get_role_info?category=${encodeURIComponent(category)}&role=${encodeURIComponent(role)}`)
             fetch(`${BACKEND_BASE_URL}/get_role_info?category=${encodeURIComponent(category)}&role=${encodeURIComponent(role)}`)
-
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('role-info').innerHTML = `
@@ -292,15 +282,10 @@
             submitButton.disabled = true;
             loadingSpinner.style.display = 'block';
 
-            // fetch('/analyzer', {
-            //     method: 'POST',
-            //     body: formData
-            // })
             fetch(`${BACKEND_BASE_URL}/analyzer`, {
-    method: 'POST',
-    body: formData
-})
-
+                method: 'POST',
+                body: formData
+            })
             .then(response => response.json())
             .then(data => {
                 submitButton.disabled = false;
@@ -353,9 +338,8 @@
         function login() {
             const email = document.getElementById('admin_email').value;
             const password = document.getElementById('admin_password').value;
-            fetch('/login', {
+            fetch(`${BACKEND_BASE_URL}/login`, {
                 method: 'POST',
-                body: new FormData(document.createElement('form')).append('email', email).append('password', password),
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
             })
@@ -370,7 +354,7 @@
         }
 
         function logout() {
-            fetch('/logout', { method: 'POST' })
+            fetch(`${BACKEND_BASE_URL}/logout`, { method: 'POST' })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
@@ -378,71 +362,67 @@
                     }
                 });
         }
-         // Chatbot Functions
+
+        // Chatbot Functions
         function toggleChatbot() {
-        const bot = document.getElementById('chatbotModal');
-        bot.style.display = bot.style.display === 'flex' ? 'none' : 'flex';
-    }
+            const bot = document.getElementById('chatbotModal');
+            bot.style.display = bot.style.display === 'flex' ? 'none' : 'flex';
+        }
 
-    async function sendMessage() {
-    const input = document.getElementById("chatInput");
-    const message = input.value.trim();
-    const chatBody = document.getElementById("chatbotBody");
+        async function sendMessage() {
+            const input = document.getElementById("chatInput");
+            const message = input.value.trim();
+            const chatBody = document.getElementById("chatbotBody");
 
-    if (message) {
-        const userMessage = document.createElement("p");
-        userMessage.style.color = "#4CAF50";
-        userMessage.textContent = "You: "+ message;
-        chatBody.appendChild(userMessage);
-        input.value = "";
+            if (message) {
+                const userMessage = document.createElement("p");
+                userMessage.style.color = "#4CAF50";
+                userMessage.textContent = "You: " + message;
+                chatBody.appendChild(userMessage);
+                input.value = "";
 
-
-        const typingMessage = document.createElement("p");
+                const typingMessage = document.createElement("p");
                 typingMessage.textContent = "Bot: Typing...";
                 chatBody.appendChild(typingMessage);
                 chatBody.scrollTop = chatBody.scrollHeight;
 
+                try {
+                    const response = await fetch(`${BACKEND_BASE_URL}/chat`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            prompt: message,
+                            stream: false
+                        })
+                    });
 
-        // Fetch response from local Ollama server
-        try {
-            const response = await fetch('http://localhost:11434/api/generate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: 'llama3',
-                    prompt: message,
-                    stream: false
-                })
-            });
-
-
-            if (!response.ok) {
+                    if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
 
-            const data = await response.json();
-            chatBody.removeChild(typingMessage);
-            const botReply = document.createElement("p");
-            botReply.textContent = "Bot: " + data.response;
-            chatBody.appendChild(botReply);
-        } catch (error) {
-            console.error('Ollama API error:', error); // Added for debugging
-            chatBody.removeChild(typingMessage);
-            const botReply = document.createElement("p");
-            botReply.textContent = "Bot: Sorry, I couldn't connect to the AI server.";
-            chatBody.appendChild(botReply);
+                    const data = await response.json();
+                    chatBody.removeChild(typingMessage);
+                    const botReply = document.createElement("p");
+                    botReply.textContent = "Bot: " + data.response;
+                    chatBody.appendChild(botReply);
+                } catch (error) {
+                    console.error('Chat API error:', error);
+                    chatBody.removeChild(typingMessage);
+                    const botReply = document.createElement("p");
+                    botReply.textContent = "Bot: Sorry, I couldn't connect to the AI server.";
+                    chatBody.appendChild(botReply);
+                }
+
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
         }
 
-        chatBody.scrollTop = chatBody.scrollHeight;
-    }
-}
-
         // Load data on page load
-        window.onload = fetchFeedbackData;
-        // Initialize with first tab active
-        openTab('trending');
+        window.onload = function() {
+            updateRoleInfo(document.getElementById('category').value, document.getElementById('role').value);
+        };
     </script>
 </body>
 </html>
