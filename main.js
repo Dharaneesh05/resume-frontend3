@@ -1,5 +1,5 @@
 // Declare as global variable to avoid redeclaration
-window.BACKEND_BASE_URL = 'https://resume-backend-1-3ypj.onrender.com';
+window.BACKEND_BASE_URL = 'https://resume-backend-ubv6.onrender.com';
 
 function login() {
     const email = document.getElementById('admin_email').value;
