@@ -223,127 +223,75 @@
         window.BACKEND_BASE_URL = 'https://resume-backend-ubv6.onrender.com';
 
         // Update roles when category changes
-        document.getElementById('category').addEventListener('change', function() {
-            fetch(`${window.BACKEND_BASE_URL}/get_roles?category=${encodeURIComponent(this.value)}`)
-                .then(response => response.json())
-                .then(data => {
-                    const roleSelect = document.getElementById('role');
-                    roleSelect.innerHTML = '';
-                    data.roles.forEach(role => {
-                        const option = document.createElement('option');
-                        option.value = role;
-                        option.textContent = role;
-                        roleSelect.appendChild(option);
-                    });
-                    updateRoleInfo(this.value, roleSelect.value);
-                })
-                .catch(error => {
-                    showError('Error fetching roles: ' + error.message);
+        document.getElementById('analyzer-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = this;
+        const formData = new FormData(form);
+        const analysisResults = document.getElementById('analysis-results');
+        const errorMessage = document.getElementById('error-message');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const submitButton = form.querySelector('button[type="submit"]');
+
+        analysisResults.style.display = 'none';
+        errorMessage.style.display = 'none';
+        errorMessage.textContent = '';
+        submitButton.disabled = true;
+        loadingSpinner.style.display = 'block';
+
+        // Log FormData contents
+        const formDataObj = {};
+        for (let [key, value] of formData.entries()) {
+            formDataObj[key] = value;
+        }
+        console.log('Submitting FormData:', formDataObj);
+
+        fetch(`${BACKEND_BASE_URL}/analyzer`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errorData => {
+                    throw new Error(`HTTP ${response.status}: ${errorData.message || 'Unknown error'}`);
                 });
+            }
+            return response.json();
+        })
+        .then(data => {
+            submitButton.disabled = false;
+            loadingSpinner.style.display = 'none';
+            if (data.status === 'success') {
+                const analysis = data.analysis;
+                analysisResults.style.display = 'block';
+                document.getElementById('ats-score-progress').style.width = `${analysis.ats_score || 0}%`;
+                document.getElementById('ats-score-text').textContent = `${analysis.ats_score || 0}%`;
+                document.getElementById('ats-score-progress').style.backgroundColor = (analysis.ats_score >= 70) ? '#4caf50' : (analysis.ats_score >= 50) ? '#ff9800' : '#f44336';
+                document.getElementById('keyword-match-score').textContent = `Keyword Match: ${analysis.keyword_match.score || 0}%`;
+                document.getElementById('missing-skills').innerHTML = analysis.keyword_match.missing_skills.length
+                    ? analysis.keyword_match.missing_skills.map(skill => `<p>- ${skill}</p>`).join('')
+                    : '<p>No missing skills identified.</p>';
+                document.getElementById('format-score').textContent = `Format Score: ${analysis.format_score || 0}%`;
+                document.getElementById('section-score').textContent = `Section Score: ${analysis.section_score || 0}%`;
+                document.getElementById('suggestions').innerHTML = `
+                    ${analysis.contact_suggestions.length ? '<h3>Contact Information</h3><ul>' + analysis.contact_suggestions.map(s => `<li>${s}</li>`).join('') + '</ul>' : ''}
+                    ${analysis.summary_suggestions.length ? '<h3>Professional Summary</h3><ul>' + analysis.summary_suggestions.map(s => `<li>${s}</li>`).join('') + '</ul>' : ''}
+                    ${analysis.skills_suggestions.length ? '<h3>Skills</h3><ul>' + analysis.skills_suggestions.map(s => `<li>${s}</li>`).join('') + '</ul>' : ''}
+                    ${analysis.experience_suggestions.length ? '<h3>Work Experience</h3><ul>' + analysis.experience_suggestions.map(s => `<li>${s}</li>`).join('') + '</ul>' : ''}
+                    ${analysis.education_suggestions.length ? '<h3>Education</h3><ul>' + analysis.education_suggestions.map(s => `<li>${s}</li>`).join('') + '</ul>' : ''}
+                    ${analysis.format_suggestions.length ? '<h3>Formatting</h3><ul>' + analysis.format_suggestions.map(s => `<li>${s}</li>`).join('') + '</ul>' : ''}
+                    ${!analysis.suggestions.length ? '<p>Your resume is well-optimized for ATS systems.</p>' : ''}
+                `;
+            } else {
+                showError('Error analyzing resume: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            submitButton.disabled = false;
+            loadingSpinner.style.display = 'none';
+            console.error('Fetch Error:', error.message);
+            showError('Error: ' + error.message);
         });
-
-        // Update role info when role changes
-        document.getElementById('role').addEventListener('change', function() {
-            updateRoleInfo(document.getElementById('category').value, this.value);
-        });
-
-        function updateRoleInfo(category, role) {
-            fetch(`${window.BACKEND_BASE_URL}/get_role_info?category=${encodeURIComponent(category)}&role=${encodeURIComponent(role)}`)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('role-info').innerHTML = `
-                        <h3>${role}</h3>
-                        <p>${data.description || 'No description available'}</p>
-                        <h4>Required Skills:</h4>
-                        <p>${data.required_skills.length ? data.required_skills.join(', ') : 'None specified'}</p>
-                    `;
-                })
-                .catch(error => {
-                    showError('Error fetching role info: ' + error.message);
-                });
-        }
-
-        // Initialize role info on page load
-        updateRoleInfo(document.getElementById('category').value, document.getElementById('role').value);
-
-        // Handle form submission
-       document.getElementById('analyzer-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const form = this;
-    const formData = new FormData(form);
-    const analysisResults = document.getElementById('analysis-results');
-    const errorMessage = document.getElementById('error-message');
-    const loadingSpinner = document.getElementById('loading-spinner');
-    const submitButton = form.querySelector('button[type="submit"]');
-
-    analysisResults.style.display = 'none';
-    errorMessage.style.display = 'none';
-    errorMessage.textContent = '';
-    submitButton.disabled = true;
-    loadingSpinner.style.display = 'block';
-
-    // Log FormData contents
-    const formDataObj = {};
-    for (let [key, value] of formData.entries()) {
-        formDataObj[key] = value;
-    }
-    console.log('Submitting FormData:', formDataObj);
-
-    fetch(`${BACKEND_BASE_URL}/analyzer`, {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(errorData => {
-                throw new Error(`HTTP ${response.status}: ${errorData.message || 'Unknown error'}`);
-            });
-        }
-        return response.json();
-    })
-    .then(data => {
-        submitButton.disabled = false;
-        loadingSpinner.style.display = 'none';
-        console.log('Analyzer Response:', data);
-        console.log('Full Response:', JSON.stringify(data, null, 2));
-        if (data.status === 'success') {
-            const analysis = data.analysis;
-            analysisResults.style.display = 'block';
-
-            const atsScore = analysis.ats_score || 0;
-            console.log('ATS Score:', atsScore);
-            const atsProgress = document.getElementById('ats-score-progress');
-            const atsText = document.getElementById('ats-score-text');
-            atsText.textContent = `${atsScore}%`;
-            atsProgress.style.width = `${atsScore}%`;
-            atsProgress.style.backgroundColor = atsScore >= 70 ? '#4caf50' : atsScore >= 50 ? '#ff9800' : '#f44336';
-
-            document.getElementById('keyword-match-score').textContent = `Keyword Match: ${analysis.keyword_match.score || 0}%`;
-            document.getElementById('missing-skills').innerHTML = analysis.keyword_match.missing_skills.length
-                ? analysis.keyword_match.missing_skills.map(skill => `<p>- ${skill}</p>`).join('')
-                : '<p>No missing skills identified.</p>';
-            document.getElementById('format-score').textContent = `Format Score: ${analysis.format_score || 0}%`;
-            document.getElementById('section-score').textContent = `Section Score: ${analysis.section_score || 0}%`;
-            document.getElementById('suggestions').innerHTML = `
-                ${analysis.contact_suggestions.length ? '<h3>Contact Information</h3><ul>' + analysis.contact_suggestions.map(s => `<li>${s}</li>`).join('') + '</ul>' : ''}
-                ${analysis.summary_suggestions.length ? '<h3>Professional Summary</h3><ul>' + analysis.summary_suggestions.map(s => `<li>${s}</li>`).join('') + '</ul>' : ''}
-                ${analysis.skills_suggestions.length ? '<h3>Skills</h3><ul>' + analysis.skills_suggestions.map(s => `<li>${s}</li>`).join('') + '</ul>' : ''}
-                ${analysis.experience_suggestions.length ? '<h3>Work Experience</h3><ul>' + analysis.experience_suggestions.map(s => `<li>${s}</li>`).join('') + '</ul>' : ''}
-                ${analysis.education_suggestions.length ? '<h3>Education</h3><ul>' + analysis.education_suggestions.map(s => `<li>${s}</li>`).join('') + '</ul>' : ''}
-                ${analysis.format_suggestions.length ? '<h3>Formatting</h3><ul>' + analysis.format_suggestions.map(s => `<li>${s}</li>`).join('') + '</ul>' : ''}
-                ${!analysis.suggestions.length ? '<p>Your resume is well-optimized for ATS systems.</p>' : ''}
-            `;
-        } else {
-            showError('Error analyzing resume: ' + (data.message || 'Unknown error'));
-        }
-    })
-    .catch(error => {
-        submitButton.disabled = false;
-        loadingSpinner.style.display = 'none';
-        console.error('Fetch Error:', error.message);
-        showError('Error: ' + error.message);
     });
-});
         function showError(message) {
             const errorMessage = document.getElementById('error-message');
             errorMessage.textContent = message;
